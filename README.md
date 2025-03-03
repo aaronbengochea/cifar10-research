@@ -27,11 +27,10 @@ python main.py --resume --lr=0.01
 - predictions.py: a script to make predictions on the hidden kaggle testset
 
 ## TODO
-- [ ] Add more models
-- [ ] Add more data augmentation
-- [ ] Add more logging
-- [ ] Add more evaluation metrics
-- [ ] Add more visualizations
+- [ ] Change checkpoint setup so that we can track checkpoints for distinct architectures as opposed to overall best model
+- [ ] Setup argparse for predictions.py so that we can pass which model we'd like to use for predictions as a command line argument
+- [ ] General argparse setup for LR, Epochs, etc. (gather inspo from: https://github.com/kuangliu/pytorch-cifar/blob/master/main.py)
+- [ ] We will need to explore smaller architectures since vanilla resnet18 with [2,2,2,2] layers yields ~11M params, challange limit is 5M
 
 
 ## Accuracy
