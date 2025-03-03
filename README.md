@@ -15,6 +15,25 @@ python main.py
 python main.py --resume --lr=0.01
 ```
 
+## General
+- Evals: stores each model evaluation vs the hidden testset
+- Checkpoint: stores each the best overall models checkpoint
+- Data: stores the CIFAR10 training and test data
+- History: stores the training history of each model
+- Models: stores each model architecture implementation and its varients 
+- Testset: stores the hidden kaggle CIFAR10 testset
+- main.py: the main training file
+- parameters.ipynb: a quick script to count the total and trainable parameters of each model
+- predictions.py: a script to make predictions on the hidden kaggle testset
+
+## TODO
+- [ ] Add more models
+- [ ] Add more data augmentation
+- [ ] Add more logging
+- [ ] Add more evaluation metrics
+- [ ] Add more visualizations
+
+
 ## Accuracy
 | Model             | Acc.        |
 | ----------------- | ----------- |
