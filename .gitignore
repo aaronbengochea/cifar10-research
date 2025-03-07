@@ -1,4 +1,25 @@
+
+venv/
 __pycache__
+
+# checkpoint models
+checkpoints/
+
+# prediction csvs
+predictions/
+
+# model history csvs
+history/
+
+# assortment of models inspired by resnet
+models/
+
+prior_implementation/
+
+# exclude tar file from dataset for git
 cifar-10-python.tar.gz
+
+
+
+
 .env
-venv
