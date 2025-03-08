@@ -27,7 +27,7 @@ class BasicBlock(nn.Module):
 
     def forward(self, x):
         identity = x
-        x = self.conv1(x)
+        x = nn.ReLU(inplace=True)(self.conv1(x))
         x = self.conv2(x)
         x += self.shortcut(identity)
         x = nn.ReLU(inplace=True)(x)
@@ -60,9 +60,16 @@ class ResNet(nn.Module):
 
     def _make_layer(self, out_channels, num_blocks, kernel_size, skip_kernel_size, stride):
         blocks = []
+        strides = []
         for i in range(num_blocks):
-            blocks.append(BasicBlock(self.in_channels, out_channels, kernel_size, skip_kernel_size, stride if i == 0 else 1))
+            if i != 0:
+                stride = 1
+
+            blocks.append(BasicBlock(self.in_channels, out_channels, kernel_size, skip_kernel_size, stride))
+            strides.append(stride)
             self.in_channels = out_channels
+        
+        print(strides, '\n')
 
         return nn.Sequential(*blocks)
 
@@ -99,17 +106,15 @@ def create_model(blocks_per_layer, channels_per_layer, kernels_per_layer, skip_k
 
 if __name__ == "__main__":
     model = create_model(
-        blocks_per_layer = [10, 6, 5, 2, 1, 1, 1],
-        #channels_per_layer = [64, 128, 256, 512],
-        channels_per_layer = [8, 16, 32, 64, 128, 248, 512],
-        kernels_per_layer = [3, 3, 3, 3, 3, 3, 3],
-        skip_kernels_per_layer = [1, 1, 1, 1, 1, 1, 1],
+        blocks_per_layer = [2, 2, 1, 1, 1],
+        channels_per_layer = [32, 64, 128, 256, 512],
+        kernels_per_layer = [3, 3, 3, 3, 3],
+        skip_kernels_per_layer = [1, 1, 1, 1, 1],
         pool_size = 1,
         starting_input_channels = 3,
-        name = 'ResNet_v1'
+        name = 'ResNet_v2'
     )
     
     print('Total model parameters:', sum(p.numel() for p in model.parameters() if p.requires_grad))
-    summary(model, (3, 32, 32))
+    #summary(model, (3, 32, 32))
 
-    #blocks_per_layer = [7, 6, 5, 2, 1, 1, 1] -> 4.99M
