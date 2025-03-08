@@ -19,7 +19,7 @@ prior_implementation/
 # exclude tar file from dataset for git
 cifar-10-python.tar.gz
 
-
+resnet_example.py
 
 
 .env
