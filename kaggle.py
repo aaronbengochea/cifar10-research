@@ -1,5 +1,6 @@
 import torch.optim as optim
 from resnet import create_model
+from resnet_bottleneck import create_bottleneck_model
 from training import main as train
 from inference import main as inference
 
@@ -24,7 +25,9 @@ SAVE_EVERY_N = 1
 
 
 if __name__ == '__main__':
-    # Initialize model
+
+    """ 
+    # Initialize regular resnet model
     try:
         model = create_model(
             blocks_per_layer=NUM_BLOCKS_PER_LAYER,
@@ -39,13 +42,32 @@ if __name__ == '__main__':
     except AssertionError as e:
         print(f'Failed to create model: {e}')
         exit(1)
+    """
+        
+
+    # Initialize regular resnet model
+    try:
+        model = create_bottleneck_model(
+            blocks_per_layer=NUM_BLOCKS_PER_LAYER,
+            channels_per_layer=NUM_CHANNELS_PER_LAYER,
+            kernels_per_layer=KERNEL_SIZE_PER_LAYER,
+            skip_kernels_per_layer=SKIP_KERNEL_SIZE_PER_LAYER,
+            pool_size=POOL_SIZE,
+            starting_input_channels=NUM_STARTING_INPUT_CHANNELS,
+            expansion_factor=4,
+            name=MODEL_NAME
+        )
+        print("model created")
+    except AssertionError as e:
+        print(f'Failed to create model: {e}')
+        exit(1)
 
 
     # Train model
     try:
         # Define optimizer
         # OPTIMIZER = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4)
-        OPTIMIZER = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
+        OPTIMIZER = optim.Adam(model.parameters(), lr=0.01, weight_decay=1e-4)
         # OPTIMIZER = optim.RMSprop(model.parameters(), lr=0.001, alpha=0.99, eps=1e-8, weight_decay=1e-4)
         
         # Define scheduler
