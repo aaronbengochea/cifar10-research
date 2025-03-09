@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torchsummary import summary
 
 class BasicBlock(nn.Module):
@@ -24,14 +25,13 @@ class BasicBlock(nn.Module):
                 nn.BatchNorm2d(out_channels)
             )
             
-        self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x):
         identity = x
-        x = self.conv1(x)
+        x = F.relu(self.conv1(x))
         x = self.conv2(x)
         x += self.shortcut(identity)
-        x = self.relu(x)
+        x = F.relu(x)
         return x
     
 
@@ -41,14 +41,12 @@ class BottleneckBlock(nn.Module):
         
         self.conv1 = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=skip_kernel_size, padding=skip_kernel_size//2, bias=False),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
+            nn.BatchNorm2d(out_channels)
         )
 
         self.conv2 = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=kernel_size//2, bias=False),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
+            nn.BatchNorm2d(out_channels)
         )
 
         self.conv3 = nn.Sequential(
@@ -63,15 +61,15 @@ class BottleneckBlock(nn.Module):
                 nn.BatchNorm2d(out_channels * expansion_factor)
             )
             
-        self.relu = nn.ReLU(inplace=True)
+        
 
     def forward(self, x):
         identity = x
-        x = self.conv1(x)
-        x = self.conv2(x)
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
         x = self.conv3(x)
         x += self.shortcut(identity)
-        x = self.relu(x)
+        x = F.relu(self.relu(x))
         return x
 
 
@@ -84,8 +82,7 @@ class ResNetBottleneck(nn.Module):
 
         self.input_layer = nn.Sequential(
             nn.Conv2d(starting_input_channels, self.in_channels, kernel_size=kernels_per_layer[0], stride=1, padding=kernels_per_layer[0]//2, bias=False),
-            nn.BatchNorm2d(self.in_channels),
-            nn.ReLU(inplace=True)
+            nn.BatchNorm2d(self.in_channels)
         )
 
         self.residual_layers = self._make_layers(blocks_per_layer, channels_per_layer, kernels_per_layer, skip_kernels_per_layer, expansion_factor)
@@ -138,7 +135,7 @@ class ResNetBottleneck(nn.Module):
 
 
     def forward(self, x):
-        x = self.input_layer(x)
+        x = F.relu(self.input_layer(x))
         x = self.residual_layers(x)
         x = self.output_layer(x)
         return x
