@@ -9,7 +9,7 @@ from resnet import *
 from utils import get_paths
 
 
-_, DATASET_PATH, SAVED_MODELS_PATH, SAVED_PREDICTIONS_PATH = get_paths()
+_, DATASET_PATH, SAVED_MODELS_PATH, SAVED_PREDICTIONS_PATH, _ = get_paths()
 
 
 def load_data():
