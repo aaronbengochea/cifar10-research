@@ -8,20 +8,22 @@ from inference import main as inference
 # Model parameters
 MODEL_NAME = 'ResNet_v1'
 NUM_STARTING_INPUT_CHANNELS = 3
-NUM_BLOCKS_PER_LAYER = [10, 6, 5, 2, 1, 1, 1]
-NUM_CHANNELS_PER_LAYER = [8, 16, 32, 64, 128, 248, 512]
-KERNEL_SIZE_PER_LAYER = [3, 3, 3, 3, 3, 3, 3]
-SKIP_KERNEL_SIZE_PER_LAYER = [1, 1, 1, 1, 1, 1, 1]
+EXPANSION_FACTOR = 3
+NUM_BLOCKS_PER_LAYER = [1, 1, 1, 1]
+NUM_CHANNELS_PER_LAYER = [64, 128, 256, 512]
+KERNEL_SIZE_PER_LAYER = [3, 3, 3, 3]
+SKIP_KERNEL_SIZE_PER_LAYER = [1, 1, 1, 1]
 POOL_SIZE = 1
 
 
 # Training parameters
-EPOCHS = 30
+EPOCHS = 200
 TRAIN_BATCH_SIZE = 128
 TEST_BATCH_SIZE = 100
 AUGMENT = True
 SAVE_MODE = 'best'  # Options: 'best', 'every'
 SAVE_EVERY_N = 1
+
 
 
 if __name__ == '__main__':

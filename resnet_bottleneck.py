@@ -41,13 +41,13 @@ class BottleneckBlock(nn.Module):
         self.conv1 = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=skip_kernel_size, bias=False),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
+            
         )
 
         self.conv2 = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=kernel_size//2, bias=False),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
+            
         )
 
         self.conv3 = nn.Sequential(
@@ -65,7 +65,9 @@ class BottleneckBlock(nn.Module):
     def forward(self, x):
         identity = x
         x = self.conv1(x)
+        x = nn.ReLU(x)
         x = self.conv2(x)
+        x = nn.ReLU(x)
         x = self.conv3(x)
         x += self.shortcut(identity)
         x = nn.ReLU(inplace=True)(x)
