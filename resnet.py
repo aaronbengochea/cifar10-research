@@ -59,16 +59,16 @@ class ResNet(nn.Module):
 
     def _make_layer(self, out_channels, num_blocks, kernel_size, skip_kernel_size, stride):
         blocks = []
-        strides = []
+        #strides = []
         for i in range(num_blocks):
             if i != 0:
                 stride = 1
 
             blocks.append(BasicBlock(self.in_channels, out_channels, kernel_size, skip_kernel_size, stride))
-            strides.append(stride)
+            #strides.append(stride)
             self.in_channels = out_channels
         
-        print(strides, '\n')
+        #print(strides, '\n')
 
         return nn.Sequential(*blocks)
 
@@ -105,10 +105,10 @@ def create_model(blocks_per_layer, channels_per_layer, kernels_per_layer, skip_k
 
 if __name__ == "__main__":
     model = create_model(
-        blocks_per_layer = [2, 2, 1, 1, 1],
-        channels_per_layer = [32, 64, 128, 256, 512],
-        kernels_per_layer = [3, 3, 3, 3, 3],
-        skip_kernels_per_layer = [1, 1, 1, 1, 1],
+        blocks_per_layer = [1, 1, 1, 1],
+        channels_per_layer = [64, 128, 256, 512],
+        kernels_per_layer = [3, 3, 3, 3],
+        skip_kernels_per_layer = [1, 1, 1, 1],
         pool_size = 1,
         starting_input_channels = 3,
         name = 'ResNet_v2'
