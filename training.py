@@ -163,6 +163,7 @@ def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False
         # Track best model for 'best' save type
         if test_accuracy > best_accuracy:
             best_accuracy, best_epoch = test_accuracy, epoch
+            save_model(model, epoch, test_accuracy)
 
         # Save model based on save type (not 'best')
         save_model(model, epoch, test_accuracy, save, every_n)
