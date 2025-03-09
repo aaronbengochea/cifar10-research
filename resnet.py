@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torchsummary import summary
 
 class BasicBlock(nn.Module):
@@ -27,10 +28,10 @@ class BasicBlock(nn.Module):
 
     def forward(self, x):
         identity = x
-        x = nn.ReLU(inplace=True)(self.conv1(x))
+        x = F.relu(self.conv1(x))
         x = self.conv2(x)
         x += self.shortcut(identity)
-        x = nn.ReLU(inplace=True)(x)
+        x = F.relu(x)
         return x
 
 
@@ -43,9 +44,7 @@ class ResNet(nn.Module):
 
         self.input_layer = nn.Sequential(
             nn.Conv2d(starting_input_channels, self.in_channels, kernel_size=kernels_per_layer[0], stride=1, padding=kernels_per_layer[0]//2, bias=False),
-            nn.BatchNorm2d(self.in_channels),
-            nn.ReLU(inplace=True)
-            
+            nn.BatchNorm2d(self.in_channels)
         )
 
         self.residual_layers = self._make_layers(blocks_per_layer, channels_per_layer, kernels_per_layer, skip_kernels_per_layer)
@@ -93,7 +92,7 @@ class ResNet(nn.Module):
 
 
     def forward(self, x):
-        x = self.input_layer(x)
+        x = F.relu(self.input_layer(x))
         x = self.residual_layers(x)
         x = self.output_layer(x)
         return x
@@ -116,5 +115,5 @@ if __name__ == "__main__":
     )
     
     print('Total model parameters:', sum(p.numel() for p in model.parameters() if p.requires_grad))
-    #summary(model, (3, 32, 32))
+    summary(model, (3, 32, 32))
 

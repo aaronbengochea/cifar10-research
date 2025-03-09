@@ -3,38 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchsummary import summary
 
-class BasicBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, skip_kernel_size, stride):
-        super(BasicBlock, self).__init__()
-
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=kernel_size//2, bias=False),
-            nn.BatchNorm2d(out_channels)
-        )
-
-        self.conv2 = nn.Sequential(
-            nn.Conv2d(out_channels, out_channels, kernel_size=kernel_size, stride=1, padding=kernel_size//2, bias=False),
-            nn.BatchNorm2d(out_channels)
-        )
-
-        self.shortcut = nn.Sequential()
-
-        if stride != 1 or in_channels != out_channels:
-            self.shortcut = nn.Sequential(
-                nn.Conv2d(in_channels, out_channels, kernel_size=skip_kernel_size, stride=stride, padding=skip_kernel_size//2, bias=False),
-                nn.BatchNorm2d(out_channels)
-            )
-            
-
-    def forward(self, x):
-        identity = x
-        x = F.relu(self.conv1(x))
-        x = self.conv2(x)
-        x += self.shortcut(identity)
-        x = F.relu(x)
-        return x
-    
-
 class BottleneckBlock(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, skip_kernel_size, stride, expansion_factor):
         super(BottleneckBlock, self).__init__()
@@ -147,8 +115,8 @@ def create_bottleneck_model(blocks_per_layer, channels_per_layer, kernels_per_la
 
 if __name__ == "__main__":
     model = create_bottleneck_model(
-        blocks_per_layer = [1, 1, 3, 1],
-        channels_per_layer = [49, 98, 196, 392],
+        blocks_per_layer = [2, 3, 2, 1],
+        channels_per_layer = [50, 100, 200, 400],
         kernels_per_layer = [3, 3, 3, 3],
         skip_kernels_per_layer = [1, 1, 1, 1],
         pool_size = 1,

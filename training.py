@@ -1,4 +1,5 @@
 import os
+import csv
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -8,7 +9,7 @@ from resnet import *
 from utils import get_paths
 
 
-DATASET_PATH, _, SAVED_MODELS_PATH, _ = get_paths()
+DATASET_PATH, _, SAVED_MODELS_PATH, _, SAVED_PERFORMANCE_PATH = get_paths()
 
 
 def count_parameters(model):
@@ -41,6 +42,19 @@ def load_data(train_batch_size=128, test_batch_size=100, augment=False):
     testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=2)
 
     return trainloader, testloader
+
+def save_performance(epoch, train_accuracy, test_accuracy, train_loss, test_loss, lr):
+    os.makedirs(SAVED_PERFORMANCE_PATH, exist_ok=True)
+    csv_file = os.path.join(SAVED_PERFORMANCE_PATH, 'training_history.csv')
+    file_exists = os.path.isfile(csv_file)
+    
+    with open(csv_file, mode='a', newline='') as f:
+        writer = csv.writer(f)
+        # Write header only if file did not exist
+        if not file_exists:
+            writer.writerow(['epoch', 'train_accuracy', 'test_accuracy', 'train_loss', 'test_loss', 'learning_rate'])
+        writer.writerow([epoch, train_accuracy, test_accuracy, train_loss, test_loss, lr])
+    print(f'History for epoch {epoch} saved to CSV.')
 
 
 def save_model(model, epoch, accuracy, save='every', every_n=1):
@@ -88,7 +102,7 @@ def train(model, trainloader, loss_func, optimizer, device):
     print(f'TRAIN:  Loss: {train_loss:.4f}  Accuracy: {accuracy:.2f}%')
 
     # Return accuracy to track best model
-    return accuracy
+    return accuracy, train_loss
 
 
 def test(model, testloader, loss_func, device):
@@ -112,7 +126,7 @@ def test(model, testloader, loss_func, device):
     accuracy = 100 * correct / total
     print(f'TEST:   Loss: {test_loss:.4f}  Accuracy: {accuracy:.2f}%')
 
-    return accuracy
+    return accuracy, test_loss
 
 
 def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False,
@@ -156,9 +170,11 @@ def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False
     print('Training model...')
     best_accuracy, best_epoch = 0.0, 0
     for epoch in range(1, epochs + 1):
-        print(f'Epoch: {epoch}/{epochs}')
-        train_accuracy = train(model, trainloader, loss_func, optimizer, device)
-        test_accuracy = test(model, testloader, loss_func, device)
+        lr = optimizer.param_groups[0]['lr']
+        print(f'Epoch: {epoch}/{epochs}, {lr:.5f}')
+        train_accuracy, train_loss = train(model, trainloader, loss_func, optimizer, device)
+        test_accuracy, test_loss = test(model, testloader, loss_func, device)
+        save_performance(epoch, train_accuracy, test_accuracy, train_loss, test_loss, lr)
 
         # Track best model for 'best' save type
         if test_accuracy > best_accuracy:
