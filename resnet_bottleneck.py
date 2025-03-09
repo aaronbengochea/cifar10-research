@@ -69,7 +69,7 @@ class BottleneckBlock(nn.Module):
         x = F.relu(self.conv2(x))
         x = self.conv3(x)
         x += self.shortcut(identity)
-        x = F.relu(self.relu(x))
+        x = F.relu(x)
         return x
 
 
