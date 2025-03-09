@@ -171,7 +171,7 @@ def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False
     best_accuracy, best_epoch = 0.0, 0
     for epoch in range(1, epochs + 1):
         lr = optimizer.param_groups[0]['lr']
-        print(f'Epoch: {epoch}/{epochs}, {lr:.5f}')
+        print(f'Epoch: {epoch}/{epochs}, LR: {lr:.5f}')
         train_accuracy, train_loss = train(model, trainloader, loss_func, optimizer, device)
         test_accuracy, test_loss = test(model, testloader, loss_func, device)
         save_performance(epoch, train_accuracy, test_accuracy, train_loss, test_loss, lr)
