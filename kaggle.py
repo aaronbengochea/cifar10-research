@@ -26,7 +26,7 @@ SAVE_EVERY_N = 1
 
 if __name__ == '__main__':
 
-    """ 
+     
     # Initialize regular resnet model
     try:
         model = create_model(
@@ -42,9 +42,10 @@ if __name__ == '__main__':
     except AssertionError as e:
         print(f'Failed to create model: {e}')
         exit(1)
-    """
+    
         
 
+    """
     # Initialize regular resnet model
     try:
         model = create_bottleneck_model(
@@ -61,7 +62,7 @@ if __name__ == '__main__':
     except AssertionError as e:
         print(f'Failed to create model: {e}')
         exit(1)
-
+    """
 
     # Train model
     try:
