@@ -12,12 +12,6 @@ from utils import get_paths
 DATASET_PATH, _, SAVED_MODELS_PATH, _, SAVED_PERFORMANCE_PATH = get_paths()
 
 
-def count_parameters(model):
-    return sum(p.numel() for p in model.parameters() if p.requires_grad)
-
-
-
-
 def load_data(train_batch_size=128, test_batch_size=100, augment=False):
 
     # Transform data for processing
@@ -27,7 +21,8 @@ def load_data(train_batch_size=128, test_batch_size=100, augment=False):
     ])
     
 
-    # Apply data regulerization methods if specified
+    # Apply data regulerization methods to trainset if specified
+    # Regularization methods used are those described in the "Deep Residual Learning for Image Recognition" resnet paper
     if augment:
         transform_train = transforms.Compose([
             transforms.RandomHorizontalFlip(),      # Random horizontal flip
@@ -38,7 +33,7 @@ def load_data(train_batch_size=128, test_batch_size=100, augment=False):
     else:
         transform_train = transform
 
-    print('Loading CIFAR-10 train/test data.')
+    print('Loading CIFAR-10 train/test data')
 
     # Load CIFAR-10 training dataset
     trainset = torchvision.datasets.CIFAR10(root=DATASET_PATH, train=True, download=True, transform=transform_train)
@@ -48,10 +43,9 @@ def load_data(train_batch_size=128, test_batch_size=100, augment=False):
     testset = torchvision.datasets.CIFAR10(root=DATASET_PATH, train=False, download=True, transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=2)
 
-    print('Successfully loaded CIFAR-10 train/test data')
+    print('Successfully loaded CIFAR-10 train/test data!')
 
     return trainloader, testloader
-
 
 
 
@@ -67,7 +61,7 @@ def save_performance(epoch, train_accuracy, test_accuracy, train_loss, test_loss
         if not file_exists:
             writer.writerow(['epoch', 'train_accuracy', 'test_accuracy', 'train_loss', 'test_loss', 'learning_rate'])
         writer.writerow([epoch, train_accuracy, test_accuracy, train_loss, test_loss, lr])
-    print(f'{model_name}, Epoch:{epoch} saved to performance history CSV.')
+    #print(f'{model_name}, Epoch:{epoch} saved to performance history CSV.')
 
 
 
@@ -81,7 +75,7 @@ def save_model(model, epoch, accuracy):
 
     if filename:
         torch.save(model, f'{SAVED_MODELS_PATH}/{filename}')
-        print(f'Acc Milestone Achived: Checkpoint saved as {filename}')
+        print(f'Model checkpoint saved as {filename}')
 
 
 
@@ -134,35 +128,39 @@ def test(model, testloader, loss_func, device):
     return accuracy, test_loss
 
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
+
 def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False, optimizer=None, scheduler=None):
     
-    # Count model parameters
+    # Count and visualize total model parameters
     total_params = count_parameters(model)
     model_name = getattr(model, 'name')
     print(f'{model_name} total parameters: {total_params}')
 
-    # Set device
+    # Set the device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    # Load data
+    # Load train and test data into 
     trainloader, testloader = load_data(train_batch_size, test_batch_size, augment)
 
-
-
     # Initialize the Model
-    print('Initializing model...')
+    print('<----- Initializing Model ----->')
     model = model.to(device)
     
-    # Define loss function
+    # Define the loss function, we choose cross entropy since this is a multi-class classification problem
     loss_func = nn.CrossEntropyLoss()
     
-    # Ensure optimizer is valid
+
+    # Ensure optimizer and schedular choices are valid
     if optimizer and not isinstance(optimizer, optim.Optimizer):
         raise TypeError('Optimizer must be an instance of torch.optim.Optimizer')
     
-    # Ensure scheduler is valid
     if scheduler and not isinstance(scheduler, optim.lr_scheduler.LRScheduler):
         raise TypeError('Scheduler must be an instance of torch.optim.lr_scheduler.LRScheduler')
+
 
     # Fallback to SGD described in "Deep Residual Learning for Image Recognition" resnet paper
     if not optimizer:
@@ -171,7 +169,7 @@ def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False
 
     
     # Training Iteration Loop
-    print('------ Training Beginning -----')
+    print('<----- Training Beginning ----->')
 
     best_accuracy = 0.0
     for epoch in range(1, epochs + 1):
@@ -196,7 +194,7 @@ def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False
                 scheduler.step()
     
 
-    print('------ Training Complete -----')
+    print('<----- Training Complete ----->')
 
 
 if __name__ == '__main__':
@@ -217,6 +215,4 @@ if __name__ == '__main__':
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1)
 
     main(model, epochs, augment=True, optimizer=optimizer, scheduler=scheduler)
-    # main(model, epochs, save='best')    # Save best model only
-    # main(model, epochs, save='every')   # Save every epoch
-    # main(model, epochs, save='every', every_n=epochs)   # Save every n epochs
+
