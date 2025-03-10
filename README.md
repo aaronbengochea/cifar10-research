@@ -1,11 +1,19 @@
 # Model inspiration 
 [ResNet18](https://arxiv.org/abs/1512.03385)
 
-# Classification Milestones
-# Classification Milestones
-| Model Name | Blocks per Layer | Channels per Layer | Parameter Count | Test Set Acc% | Hidden Test Set Acc% | Optimizer                     | Scheduler                        |
-|------------|------------------|--------------------|-----------------|---------------|----------------------|-------------------------------|----------------------------------|
-| ResNet40   | [5, 7, 4, 3]     | [32, 64, 128, 256] | 4.99M           | 95.32%        | 84.97%               | SGD(lr=0.1, momentum=0.9)       | CosineAnnealingLR(Tmax=250)        |
+# Architecture Details 
+| Model Name | Blocks per Layer | Channels per Layer | Parameter Count |
+|------------|------------------|--------------------|-----------------|
+| ResNet40   | [5, 7, 4, 3]     | [32, 64, 128, 256] | 4.99M           |
+
+# Training and Performance Details
+| Model Name | Test Set Acc% | Hidden Test Set Acc% | Optimizer                     | Scheduler                        |
+|------------|---------------|----------------------|-------------------------------|----------------------------------|
+| ResNet40   | 95.32%        | 84.97%               | SGD(lr=0.1, momentum=0.9)       | CosineAnnealingLR(Tmax=250)        |
+
+
+
+
 
 
 
