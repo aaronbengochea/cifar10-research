@@ -16,22 +16,29 @@ def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
+
+
 def load_data(train_batch_size=128, test_batch_size=100, augment=False):
-    # Define data preprocessing transformations
+
+    # Transform data for processing
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))    # Normalize using CIFAR-10 mean and std
     ])
     
-    # Data augmentation
-    transform_train = transforms.Compose([
-        transforms.RandomHorizontalFlip(),      # Random horizontal flip
-        transforms.RandomCrop(32, padding=4),   # Random cropping
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))    # Normalize using CIFAR-10 mean and std
-    ]) if augment else transform
 
-    print('Loading data...')
+    # Apply data regulerization methods if specified
+    if augment:
+        transform_train = transforms.Compose([
+            transforms.RandomHorizontalFlip(),      # Random horizontal flip
+            transforms.RandomCrop(32, padding=4),   # Random cropping
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))    # Normalize using CIFAR-10 mean and std
+        ]) 
+    else:
+        transform_train = transform
+
+    print('Loading CIFAR-10 train/test data.')
 
     # Load CIFAR-10 training dataset
     trainset = torchvision.datasets.CIFAR10(root=DATASET_PATH, train=True, download=True, transform=transform_train)
@@ -41,11 +48,17 @@ def load_data(train_batch_size=128, test_batch_size=100, augment=False):
     testset = torchvision.datasets.CIFAR10(root=DATASET_PATH, train=False, download=True, transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=2)
 
+    print('Successfully loaded CIFAR-10 train/test data')
+
     return trainloader, testloader
 
-def save_performance(epoch, train_accuracy, test_accuracy, train_loss, test_loss, lr):
+
+
+
+
+def save_performance(epoch, train_accuracy, test_accuracy, train_loss, test_loss, lr, model_name):
     os.makedirs(SAVED_PERFORMANCE_PATH, exist_ok=True)
-    csv_file = os.path.join(SAVED_PERFORMANCE_PATH, 'training_history.csv')
+    csv_file = os.path.join(SAVED_PERFORMANCE_PATH, f'{model_name}_training_history.csv')
     file_exists = os.path.isfile(csv_file)
     
     with open(csv_file, mode='a', newline='') as f:
@@ -54,7 +67,9 @@ def save_performance(epoch, train_accuracy, test_accuracy, train_loss, test_loss
         if not file_exists:
             writer.writerow(['epoch', 'train_accuracy', 'test_accuracy', 'train_loss', 'test_loss', 'learning_rate'])
         writer.writerow([epoch, train_accuracy, test_accuracy, train_loss, test_loss, lr])
-    print(f'History for epoch {epoch} saved to CSV.')
+    print(f'{model_name}, Epoch:{epoch} saved to performance history CSV.')
+
+
 
 
 def save_model(model, epoch, accuracy, save='every', every_n=1):
@@ -129,13 +144,12 @@ def test(model, testloader, loss_func, device):
     return accuracy, test_loss
 
 
-def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False,
-         optimizer=None, scheduler=None, save='best', every_n=1):
+def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False, optimizer=None, scheduler=None, save='best', every_n=1):
+    
     # Count model parameters
     total_params = count_parameters(model)
     print(f'Total model parameters: {total_params}')
-    if total_params > 5_000_000:
-        raise ValueError('Model cannot have more than 5 million parameters')
+
 
     # Ensure save option is valid
     save_options = ['best', 'every']
@@ -151,6 +165,8 @@ def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False
     # Initialize model
     print('Initializing model...')
     model = model.to(device)
+
+    model_name = getattr(model, 'name')
 
     # Define loss function
     loss_func = nn.CrossEntropyLoss()
@@ -174,7 +190,7 @@ def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False
         print(f'Epoch: {epoch}/{epochs}, LR: {lr}')
         train_accuracy, train_loss = train(model, trainloader, loss_func, optimizer, device)
         test_accuracy, test_loss = test(model, testloader, loss_func, device)
-        save_performance(epoch, train_accuracy, test_accuracy, train_loss, test_loss, lr)
+        save_performance(epoch, train_accuracy, test_accuracy, train_loss, test_loss, lr, model_name)
 
         # Track best model for 'best' save type
         if test_accuracy > best_accuracy:
