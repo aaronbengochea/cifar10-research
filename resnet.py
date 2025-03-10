@@ -105,8 +105,8 @@ def create_model(blocks_per_layer, channels_per_layer, kernels_per_layer, skip_k
 
 if __name__ == "__main__":
     model = create_model(
-        blocks_per_layer = [1, 1, 1, 1],
-        channels_per_layer = [64, 128, 256, 512],
+        blocks_per_layer = [3 , 6, 4, 3],
+        channels_per_layer = [32, 64, 128, 256],
         kernels_per_layer = [3, 3, 3, 3],
         skip_kernels_per_layer = [1, 1, 1, 1],
         pool_size = 1,
