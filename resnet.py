@@ -36,10 +36,11 @@ class BasicBlock(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, blocks_per_layer, channels_per_layer, kernels_per_layer, skip_kernels_per_layer, pool_size, starting_input_channels, name, num_classes=10):
+    def __init__(self, blocks_per_layer, channels_per_layer, kernels_per_layer, skip_kernels_per_layer, starting_input_channels, name, num_classes=10):
         super(ResNet, self).__init__()
         self.in_channels = channels_per_layer[0]
         self.name = name
+        self.pool_size = 1
 
 
         self.input_layer = nn.Sequential(
@@ -51,7 +52,7 @@ class ResNet(nn.Module):
 
 
         self.output_layer = nn.Sequential(
-            nn.AdaptiveAvgPool2d(pool_size),
+            nn.AdaptiveAvgPool2d(self.pool_size),
             nn.Flatten(),
             nn.Linear(channels_per_layer[-1], num_classes)
         )
@@ -77,13 +78,18 @@ class ResNet(nn.Module):
     def _make_layers(self, blocks_per_layer, channels_per_layer, kernels_per_layer, skip_kernels_per_layer):
         layers = []
         for i in range(len(blocks_per_layer)):
+            if i == 0:
+                stride = 1
+            else: 
+                stride = 2
+
             layers.append(
                 self._make_layer(
                     out_channels = channels_per_layer[i],
                     num_blocks = blocks_per_layer[i],
                     kernel_size = kernels_per_layer[i],
                     skip_kernel_size = skip_kernels_per_layer[i],
-                    stride = 1 if i == 0 else 2
+                    stride = stride
                 )
             )
 
@@ -99,8 +105,8 @@ class ResNet(nn.Module):
 
 
 
-def create_model(blocks_per_layer, channels_per_layer, kernels_per_layer, skip_kernels_per_layer, pool_size, starting_input_channels, name):
-    return ResNet(blocks_per_layer, channels_per_layer, kernels_per_layer, skip_kernels_per_layer, pool_size, starting_input_channels, name)
+def create_model(blocks_per_layer, channels_per_layer, kernels_per_layer, skip_kernels_per_layer, starting_input_channels, name):
+    return ResNet(blocks_per_layer, channels_per_layer, kernels_per_layer, skip_kernels_per_layer, starting_input_channels, name)
 
 
 if __name__ == "__main__":
@@ -109,7 +115,6 @@ if __name__ == "__main__":
         channels_per_layer = [32, 64, 128, 256],
         kernels_per_layer = [3, 3, 3, 3],
         skip_kernels_per_layer = [1, 1, 1, 1],
-        pool_size = 1,
         starting_input_channels = 3,
         name = 'ResNet_v2'
     )
