@@ -72,22 +72,18 @@ def save_performance(epoch, train_accuracy, test_accuracy, train_loss, test_loss
 
 
 
-def save_model(model, epoch, accuracy, save='every', every_n=1):
-    # Ensure saved_models directory exists
+def save_model(model, epoch, accuracy):
     os.makedirs(SAVED_MODELS_PATH, exist_ok=True)
     
-    # Extract model name
     model_name = getattr(model, 'name')
 
-    # Determine filename based on save type
-    filename = None
-    if save == 'every' and epoch % every_n == 0:
-        filename = f'{model_name}_epoch{epoch}_acc{round(accuracy)}.pth'
+    filename = f'{model_name}_epoch{epoch}_acc{round(accuracy)}.pth'
 
-    # Save model in saved_models directory
     if filename:
         torch.save(model, f'{SAVED_MODELS_PATH}/{filename}')
-        print(f'Model saved as {filename}')
+        print(f'Acc Milestone Achived: Checkpoint saved as {filename}')
+
+
 
 
 def train(model, trainloader, loss_func, optimizer, device):
@@ -96,9 +92,7 @@ def train(model, trainloader, loss_func, optimizer, device):
 
     for batch_idx, (images, labels) in enumerate(trainloader):
         images, labels = images.to(device), labels.to(device)
-
         optimizer.zero_grad()   # Reset gradients
-
         outputs = model(images)             # Forward pass
         loss = loss_func(outputs, labels)   # Compute loss
 
@@ -111,13 +105,11 @@ def train(model, trainloader, loss_func, optimizer, device):
         correct += (predicted == labels).sum().item()
         total += labels.size(0)
     
-    # Compute average loss and accuracy for the epoch
     train_loss /= len(trainloader)
     accuracy = 100 * correct / total
-    print(f'TRAIN:  Loss: {train_loss:.4f}  Accuracy: {accuracy:.2f}%')
 
-    # Return accuracy to track best model
     return accuracy, train_loss
+
 
 
 def test(model, testloader, loss_func, device):
@@ -127,7 +119,6 @@ def test(model, testloader, loss_func, device):
     with torch.no_grad():
         for batch_idx, (images, labels) in enumerate(testloader):
             images, labels = images.to(device), labels.to(device)
-
             outputs = model(images)
             loss = loss_func(outputs, labels)
 
@@ -139,22 +130,16 @@ def test(model, testloader, loss_func, device):
     
     test_loss /= len(testloader)
     accuracy = 100 * correct / total
-    print(f'TEST:   Loss: {test_loss:.4f}  Accuracy: {accuracy:.2f}%')
 
     return accuracy, test_loss
 
 
-def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False, optimizer=None, scheduler=None, save='best', every_n=1):
+def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False, optimizer=None, scheduler=None):
     
     # Count model parameters
     total_params = count_parameters(model)
-    print(f'Total model parameters: {total_params}')
-
-
-    # Ensure save option is valid
-    save_options = ['best', 'every']
-    if save not in save_options:
-        raise ValueError(f'Save option must be one of: {save_options}')
+    model_name = getattr(model, 'name')
+    print(f'{model_name} total parameters: {total_params}')
 
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -162,77 +147,76 @@ def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False
     # Load data
     trainloader, testloader = load_data(train_batch_size, test_batch_size, augment)
 
-    # Initialize model
+
+
+    # Initialize the Model
     print('Initializing model...')
     model = model.to(device)
-
-    model_name = getattr(model, 'name')
-
+    
     # Define loss function
     loss_func = nn.CrossEntropyLoss()
     
     # Ensure optimizer is valid
     if optimizer and not isinstance(optimizer, optim.Optimizer):
         raise TypeError('Optimizer must be an instance of torch.optim.Optimizer')
-
-    # Define optimizer
-    optimizer = optimizer if optimizer else optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4)
-
+    
     # Ensure scheduler is valid
     if scheduler and not isinstance(scheduler, optim.lr_scheduler.LRScheduler):
         raise TypeError('Scheduler must be an instance of torch.optim.lr_scheduler.LRScheduler')
 
-    # Train model for multiple epochs
-    print('Training model...')
-    best_accuracy, best_epoch = 0.0, 0
+    # Fallback to SGD described in "Deep Residual Learning for Image Recognition" resnet paper
+    if not optimizer:
+        optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4)
+
+
+    
+    # Training Iteration Loop
+    print('------ Training Beginning -----')
+
+    best_accuracy = 0.0
     for epoch in range(1, epochs + 1):
         lr = optimizer.param_groups[0]['lr']
         print(f'Epoch: {epoch}/{epochs}, LR: {lr}')
+
         train_accuracy, train_loss = train(model, trainloader, loss_func, optimizer, device)
         test_accuracy, test_loss = test(model, testloader, loss_func, device)
+
+        print(f'Avg Train Loss: {train_loss:.4f}, Avg Test Loss: {test_loss:.4f}, Train Acc: {train_accuracy:.2f}%, Test Acc: {test_accuracy:.2f}%')
         save_performance(epoch, train_accuracy, test_accuracy, train_loss, test_loss, lr, model_name)
 
-        # Track best model for 'best' save type
         if test_accuracy > best_accuracy:
-            best_accuracy, best_epoch = test_accuracy, epoch
+            best_accuracy = test_accuracy
             save_model(model, epoch, test_accuracy)
 
-        # Save model based on save type (not 'best')
-        save_model(model, epoch, test_accuracy, save, every_n)
-
+        # Example of how we can reset parameters dynamically for any particular schdular object
         if scheduler:
             if isinstance(scheduler, optim.lr_scheduler.ReduceLROnPlateau):
                 scheduler.step(test_accuracy)
             else:
                 scheduler.step()
     
-    if save == 'best':
-        # Save best model using default save='every' and every_n=1
-        save_model(model, best_epoch, best_accuracy)
 
-    print('Training complete')
+    print('------ Training Complete -----')
 
 
 if __name__ == '__main__':
-    try:
-        model = create_model(
-            blocks_per_layer = [1, 1, 1, 1],
-            channels_per_layer = [64, 128, 256, 512],
-            kernels_per_layer = [3, 3, 3, 3],
-            skip_kernels_per_layer = [1, 1, 1, 1],
-            pool_size = 1,
-            starting_input_channels = 3,
-            name = 'ResNet_v1'
-        )
+
+    model = create_model(
+        blocks_per_layer = [1, 1, 1, 1],
+        channels_per_layer = [64, 128, 256, 512],
+        kernels_per_layer = [3, 3, 3, 3],
+        skip_kernels_per_layer = [1, 1, 1, 1],
+        pool_size = 1,
+        starting_input_channels = 3,
+        name = 'ResNet_v1'
+    )
 
 
-        epochs = 3
-        optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=5e-4)
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1)
+    epochs = 3
+    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=5e-4)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1)
 
-        main(model, epochs, augment=True, optimizer=optimizer, scheduler=scheduler)
-        # main(model, epochs, save='best')    # Save best model only
-        # main(model, epochs, save='every')   # Save every epoch
-        # main(model, epochs, save='every', every_n=epochs)   # Save every n epochs
-    except (AssertionError, ValueError, TypeError) as e:
-        print(f'ERROR: {e}')
+    main(model, epochs, augment=True, optimizer=optimizer, scheduler=scheduler)
+    # main(model, epochs, save='best')    # Save best model only
+    # main(model, epochs, save='every')   # Save every epoch
+    # main(model, epochs, save='every', every_n=epochs)   # Save every n epochs
