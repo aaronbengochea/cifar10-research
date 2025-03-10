@@ -1,6 +1,11 @@
 # Model inspiration 
-|-------------------------------------------------------| Test Acc% | Hidden Acc% |
-| [ResNet18](https://arxiv.org/abs/1512.03385)          |  95.32%   |   84.97%    |
+[ResNet18](https://arxiv.org/abs/1512.03385)
+
+# Classification Milestones
+| Model Name | Blocks per Layer | Channels per Layer | Test Set Acc% | Hidden Test Set Acc% |
+|------------|------------------|--------------------|---------------|----------------------|
+| ResNet40   | [5, 7, 4, 3]     | [32, 64, 128, 256] | 95.32%        | 84.97%               |
+
 
 ## Training
 ```
