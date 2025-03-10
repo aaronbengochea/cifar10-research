@@ -1,18 +1,25 @@
 
 venv/
 __pycache__
+.DS_store
 
 # checkpoint models
 checkpoints/
 
-# prediction csvs
-predictions/
+# prediction CSV
+predictions_history/
 
 # model history csvs
 history/
 
-# assortment of models inspired by resnet
-models/
+
+# Model output folders
+model_checkpoint_history/
+predictions_history/
+training_history/
+
+
+
 
 prior_implementation/
 
