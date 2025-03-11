@@ -43,7 +43,7 @@ def load_data(train_batch_size=128, test_batch_size=100, augment=False):
     testset = torchvision.datasets.CIFAR10(root=DATASET_PATH, train=False, download=True, transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=2)
 
-    print('Successfully loaded CIFAR-10 train/test data!')
+    print('Successfully loaded CIFAR-10 train/test data')
 
     return trainloader, testloader
 
@@ -183,7 +183,7 @@ def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False
         train_accuracy, train_loss = train(model, trainloader, loss_func, optimizer, device)
         test_accuracy, test_loss = test(model, testloader, loss_func, device)
 
-        print(f'Avg Train Loss: {train_loss:.4f}, Avg Test Loss: {test_loss:.4f}, Train Acc: {train_accuracy:.2f}%, Test Acc: {test_accuracy:.2f}%')
+        print(f'Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, Train Acc: {train_accuracy:.2f}%, Test Acc: {test_accuracy:.2f}%')
         save_performance(epoch, train_accuracy, test_accuracy, train_loss, test_loss, lr, model_name)
 
         if test_accuracy > best_accuracy:
