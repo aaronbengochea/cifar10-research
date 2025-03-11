@@ -110,7 +110,7 @@ def train(model, trainloader, loss_func, optimizer, device):
 
 def test(model, testloader, loss_func, device):
     model.eval()
-    train_loss = 0
+    test_loss = 0
     correct = 0
     total = 0
 
