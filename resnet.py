@@ -35,9 +35,9 @@ class BasicBlock(nn.Module):
         return x
 
 
-class ResNet(nn.Module):
+class ResNetBasicBlock(nn.Module):
     def __init__(self, blocks_per_layer, channels_per_layer, kernels_per_layer, skip_kernels_per_layer, starting_input_channels, name, num_classes=10):
-        super(ResNet, self).__init__()
+        super(ResNetBasicBlock, self).__init__()
         self.in_channels = channels_per_layer[0]
         self.name = name
         self.pool_size = 1
@@ -105,18 +105,19 @@ class ResNet(nn.Module):
 
 
 
-def create_model(blocks_per_layer, channels_per_layer, kernels_per_layer, skip_kernels_per_layer, starting_input_channels, name):
-    return ResNet(blocks_per_layer, channels_per_layer, kernels_per_layer, skip_kernels_per_layer, starting_input_channels, name)
+def create_basicblock_model(blocks_per_layer, channels_per_layer, kernels_per_layer, skip_kernels_per_layer, starting_input_channels, name):
+    return ResNetBasicBlock(blocks_per_layer, channels_per_layer, kernels_per_layer, skip_kernels_per_layer, starting_input_channels, name)
 
 
 if __name__ == "__main__":
-    model = create_model(
+    model = create_basicblock_model(
+        name = 'ResNet_v2',
+        starting_input_channels = 3,
         blocks_per_layer = [5 , 7, 4, 3],
         channels_per_layer = [32, 64, 128, 256],
         kernels_per_layer = [3, 3, 3, 3],
-        skip_kernels_per_layer = [1, 1, 1, 1],
-        starting_input_channels = 3,
-        name = 'ResNet_v2'
+        skip_kernels_per_layer = [1, 1, 1, 1]
+        
     )
     
     print('Total model parameters:', sum(p.numel() for p in model.parameters() if p.requires_grad))
