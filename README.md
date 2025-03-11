@@ -1,5 +1,6 @@
 # Model inspiration 
-[ResNet18](https://arxiv.org/abs/1512.03385)
+This repository takes inspiration from [Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385).
+We explore model architectures inspires by ResNet18
 
 # Architecture Details 
 | Model Name | Blocks per Layer | Channels per Layer | Parameter Count |
@@ -13,19 +14,10 @@
 
 
 
+### General Setup - Kaggle
 
 
 
-
-
-## Training
-```
-# Start training with: 
-python main.py
-
-# You can manually resume the training with: 
-python main.py --resume --lr=0.01
-```
 
 ## General
 - Data: stores the CIFAR10 training and test data
@@ -37,6 +29,17 @@ python main.py --resume --lr=0.01
 
 
 
+
+## Training
+```
+WORK IN PROGRESS
+
+# Start training with: 
+python main.py
+
+# You can manually resume the training with: 
+python main.py --resume --lr=0.01
+```
 
 
 
