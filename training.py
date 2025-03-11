@@ -82,7 +82,9 @@ def save_model(model, epoch, accuracy):
 
 def train(model, trainloader, loss_func, optimizer, device):
     model.train()
-    train_loss, correct, total = 0, 0, 0
+    train_loss = 0
+    correct = 0
+    total = 0
 
     for batch_idx, (images, labels) in enumerate(trainloader):
         images, labels = images.to(device), labels.to(device)
@@ -108,7 +110,9 @@ def train(model, trainloader, loss_func, optimizer, device):
 
 def test(model, testloader, loss_func, device):
     model.eval()
-    test_loss, correct, total = 0, 0, 0
+    train_loss = 0
+    correct = 0
+    total = 0
 
     with torch.no_grad():
         for batch_idx, (images, labels) in enumerate(testloader):
@@ -199,14 +203,13 @@ def main(model, epochs, train_batch_size=128, test_batch_size=100, augment=False
 
 if __name__ == '__main__':
 
-    model = create_model(
-        blocks_per_layer = [1, 1, 1, 1],
-        channels_per_layer = [64, 128, 256, 512],
-        kernels_per_layer = [3, 3, 3, 3],
-        skip_kernels_per_layer = [1, 1, 1, 1],
-        pool_size = 1,
+    model = create_basicblock_model(
+        name = 'ResNet_v2',
         starting_input_channels = 3,
-        name = 'ResNet_v1'
+        blocks_per_layer = [5 , 7, 4, 3],
+        channels_per_layer = [32, 64, 128, 256],
+        kernels_per_layer = [3, 3, 3, 3],
+        skip_kernels_per_layer = [1, 1, 1, 1]
     )
 
 
